@@ -1,0 +1,3 @@
+[submodule "gametree"]
+	path = gametree
+	url = https://github.com/deadsmond/gametree
