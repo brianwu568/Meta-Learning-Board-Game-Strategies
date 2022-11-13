@@ -34,10 +34,20 @@ class Player:
     def __init__(self, board: Board, color: int):
         self.color = color
         self.board = board
-
+        self.opponent = None
         self.piece_set = []
 
+    def add_opponent(self, opponent):
+        self.opponent = opponent
+
     def find_moveset(self):
+        moveset = []
+        for x in self.piece_set:
+            moveset += x.find_moveset()
+        print(len(list(set(moveset))))
+        return list(set(moveset))
+
+    def print_moveset(self):
         print("POSSIBLE MOVES:")
         for x in self.piece_set:
             print(x.name, ":", x.location)
@@ -95,7 +105,6 @@ class Piece:
         self.color = color
         self.board = board
         self.player = player
-
         self.board.coordinates_to_occupied[self.location] = self
         self.player.piece_set.append(self)
 
@@ -110,7 +119,6 @@ class Piece:
     
     def get_taken(self):
         self.player.piece_set.remove(self)
-
 
 class Pawn(Piece):
     def find_moveset(self):
@@ -163,3 +171,272 @@ class Pawn(Piece):
             self.get_taken()
             new_piece = Pawn(self.location, "White Queen (Promoted)", 0, self.board, self.player)
             self.player.piece_set.append(new_piece)
+        
+class Knight(Piece):
+    def find_moveset(self):
+        file, rank = self.location
+
+        moveset = []
+        file_offset = [-2, -1, 1, 2, 2, 1, -1, -2]
+        rank_offset = [-1, -2, -2, -1, 1, 2, 2, 1]
+
+        for move in zip(file_offset, rank_offset):
+            target_location = (file + move[0], rank + move[1])
+            if target_location in self.board.coordinates_to_occupied and (self.board.coordinates_to_occupied[target_location] is None or self.board.coordinates_to_occupied[target_location].color != self.color):
+                moveset.append(target_location)
+        return moveset
+
+    def move(self, target_location):
+        
+        if self.board.coordinates_to_occupied[target_location] is not None:
+            self.board.coordinates_to_occupied[target_location].get_taken()
+        
+        self.board.coordinates_to_occupied[self.location] = None
+        self.location = target_location
+        
+        self.board.coordinates_to_occupied[self.location] = self
+
+class Rook(Piece):
+    def find_moveset(self):
+        file, rank = self.location
+        moveset = []
+
+        #move left:
+        traverser = (file - 1, rank)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] -= 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)
+
+        #move right
+        traverser = (file + 1, rank)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] += 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser) 
+
+        #move up
+        traverser = (file, rank + 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[1] += 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)    
+
+        #move down
+        traverser = (file, rank - 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[1] -= 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)       
+
+        return moveset
+
+    def move(self, target_location):
+        
+        if self.board.coordinates_to_occupied[target_location] is not None:
+            self.board.coordinates_to_occupied[target_location].get_taken()
+        
+        self.board.coordinates_to_occupied[self.location] = None
+        self.location = target_location
+        
+        self.board.coordinates_to_occupied[self.location] = self
+
+class Bishop(Piece):
+    def find_moveset(self):
+        file, rank = self.location
+        moveset = []
+
+        #move up left:
+        traverser = (file - 1, rank + 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] -= 1
+            traverser[1] += 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)
+
+        #move up right
+        traverser = (file + 1, rank + 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] += 1
+            traverser[1] += 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser) 
+
+        #move down left
+        traverser = (file - 1, rank - 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] -= 1
+            traverser[1] -= 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)    
+
+        #move down right
+        traverser = (file + 1, rank - 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] += 1
+            traverser[1] -= 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)       
+
+        return moveset
+
+    def move(self, target_location):
+        
+        if self.board.coordinates_to_occupied[target_location] is not None:
+            self.board.coordinates_to_occupied[target_location].get_taken()
+        
+        self.board.coordinates_to_occupied[self.location] = None
+        self.location = target_location
+        
+        self.board.coordinates_to_occupied[self.location] = self
+
+class Queen(Piece):
+    def find_moveset(self):
+        file, rank = self.location
+        moveset = []
+
+        #move left
+        traverser = (file - 1, rank)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] -= 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)
+
+        #move right
+        traverser = (file + 1, rank)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] += 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser) 
+
+        #move up
+        traverser = (file, rank + 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[1] += 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)    
+
+        #move down
+        traverser = (file, rank - 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[1] -= 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser) 
+
+        #move up left:
+        traverser = (file - 1, rank + 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] -= 1
+            traverser[1] += 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)
+
+        #move up right
+        traverser = (file + 1, rank + 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] += 1
+            traverser[1] += 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser) 
+
+        #move down left
+        traverser = (file - 1, rank - 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] -= 1
+            traverser[1] -= 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)    
+
+        #move down right
+        traverser = (file + 1, rank - 1)
+        while traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] == None:
+            moveset.append(traverser)
+            traverser = list(traverser)
+            traverser[0] += 1
+            traverser[1] -= 1
+            traverser = tuple(traverser)
+        if (traverser in self.board.coordinates_to_occupied and self.board.coordinates_to_occupied[traverser] != None):
+            if self.board.coordinates_to_occupied[traverser].color != self.color:
+                moveset.append(traverser)       
+
+        return moveset
+
+    def move(self, target_location):
+        
+        if self.board.coordinates_to_occupied[target_location] is not None:
+            self.board.coordinates_to_occupied[target_location].get_taken()
+        
+        self.board.coordinates_to_occupied[self.location] = None
+        self.location = target_location
+        
+        self.board.coordinates_to_occupied[self.location] = self
+
+"""
+class King(Piece):
+    def __init__(self, location: tuple, name: str, color: int, board: Board, player: Player):
+        Piece.__init__(self, location: tuple, name: str, color: int, board: Board, player: Player)
+        self.can_castle = True
+
+    def find_moveset(self):
+        opponent_moveset = self.player.opponent.find_moveset()
+"""
