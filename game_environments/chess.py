@@ -1,1 +1,0 @@
-#Chess Gameplay Environment
