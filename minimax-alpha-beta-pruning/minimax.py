@@ -11,6 +11,7 @@ class MiniMaxAgent:
         self.POSITIVE_INFINITY = float('inf')       # Constant to represent positive infinity
         self.NEGATIVE_INFINITY = -1 * float('inf')  # Constant to represent negative infinity
 
+
     # Return the Successors (Children Nodes) of a Node
     def getChildren(self, current_node):
         if current_node == None:
@@ -18,6 +19,7 @@ class MiniMaxAgent:
         else:
             children_node_list = list(current_node.children)
             return children_node_list
+
 
     # Return whether or not a Node is a leaf node (has no children)
     def isLeaf(self, current_node):
@@ -30,13 +32,15 @@ class MiniMaxAgent:
             else: # There are children, so this is not a leaf node
                 return False
 
-    # Return the value of a current node
+
+    # Return the current value of a node
     def getValue(self, current_node):
         if current_node == None:
             raise Exception("getValue: Node being passed into function is of type NONE")
         else:
             current_node_value = current_node.value
             return current_node_value
+            
 
     # Find the maximum value out of a node and its children (A maximizing the chance of A winning)
     def getMaxValue(self, current_node):
@@ -58,6 +62,7 @@ class MiniMaxAgent:
 
             return maximum_value
 
+
     # Find the minimum value out of a node and its children (B trying to minimize the chance of A winning)
     def getMinValue(self, current_node):
         print("MiniMax->MIN: Currently Visiting Node: " + str(current_node.id))
@@ -78,6 +83,8 @@ class MiniMaxAgent:
 
             return minimum_value
 
+
+    # Compute the next best move using the MiniMax Algorithm
     def minimaxBestMove(self, gametree_root_node):
         # Get the current best value (the value of the root node of the tree)
         best_value = self.getMaxValue(gametree_root_node)
