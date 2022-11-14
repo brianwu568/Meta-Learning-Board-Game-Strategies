@@ -22,7 +22,8 @@ SIMPLE is basically a deep reinforcement learning framework to learn board games
 - Chess game environment (Ian)
 - Checkers game environment (Ian)
 - Connect-4 game environment (Ian)
-- Minimax skeleton (Brian)
+- Minimax + Alpha Beta Pruning skeleton (Brian)
+- GameTree Data Structure (Brian)
 
 ### NOTES:
 - Chess doesn't have en passant or promotion choice enabled (always queen). Isn't super necessary at the moment.
