@@ -11,6 +11,7 @@
 ### DONE:
 - Chess game environment (Ian)
 - Checkers game environment (Ian)
+- Connect-4 game environment (Ian)
 - Minimax skeleton (Brian)
 
 ### NOTES:
