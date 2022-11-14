@@ -64,6 +64,7 @@ class Player:
             else:
                 moveset[x.location] = x.find_moveset(board)
         return moveset
+        
     def find_moveset_length(self, board):
         moveset = self.find_moveset(board)
         #print(moveset)
