@@ -1,3 +1,6 @@
 [submodule "gametree"]
 	path = gametree
 	url = https://github.com/deadsmond/gametree
+[submodule "SIMPLE"]
+	path = SIMPLE
+	url = https://github.com/davidADSP/SIMPLE.git
