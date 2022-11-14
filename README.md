@@ -11,3 +11,6 @@
 ### DONE:
 - Chess game environment (Ian)
 - Minimax skeleton (Brian)
+
+### NOTES:
+- Chess doesn't have en passant or promotion choice enabled (always queen). Isn't super necessary at the moment.
