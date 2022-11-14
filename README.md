@@ -5,9 +5,10 @@ Read through https://medium.com/applied-data-science/how-to-train-ai-agents-to-p
 
 SIMPLE is basically a deep reinforcement learning framework to learn board games. It's really good so I think for the milestone, at least, we should use it as an oracle. The idea I have in mind is:
 1. Train SIMPLE on each board game we have configured. Record training time.
-2. Use the learned SIMPLE agent generate data. For each position we generate, we can have SIMPLE play somewhere around 100 games against itself starting from that position. The numerical value of that position (that'll be the output of our neural net) is going to be the normalized number of games it wins against itself from that starting position, mapping from -1 to 1. 
-3. Train neural networks to predict the numerical value given the position. We will try a) training from scratch, and b) transfer learning. For now, we should probably just stick to training from scratch.
-4. Figure out positional encodings? simultaneous task learning? idk at this point i'm out of ideas
+2. Use the learned SIMPLE agent to generate data. For each position we generate, we can have SIMPLE play games itself from that position. The move predicted from that position is the the output of our neural net. 
+3. Train neural networks to predict the numerical value given the position. We will try a) training from scratch, and b) transfer learning. For now, we should probably just stick to training from scratch. Inputs will be board state, with pieces encoded as one-hot encoders. As per Eric's advice, each neural net will have an initial layer that's unfrozen, which will act as the encoder/embedding layer. The output for the milestone should be a move. This may be challenging since the action space differs based on the board state. 
+4. We only have concrete data on the best move for chess. Therefore, our base neural nets will be trained on (input, output) = (position, SIMPLE prediction) for non-chess games and fine-tuned on chess for testing.
+5. Figure out positional encodings? simultaneous task learning? idk at this point i'm out of ideas
 
 
 ### TODO:
