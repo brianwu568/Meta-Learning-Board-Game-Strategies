@@ -38,19 +38,20 @@ The idea for this is basically the same as the previous experiments; the differe
 
 
 ### TODO:
-- Build game environments (Ian- in progress)
-- Talk with TAs aboiut encoding schema (Ian- will do Monday)
-- Recreate results from https://www.ai.rug.nl/~mwiering/GROUP/ARTICLES/ICPRAM_CHESS_DNN_2018.pdf (URGENT- needs training time, architecture is relatively simple)
-- Find Checkers dataset online (Brian - in progress)
-- Reinforcement learning skeleton- URGENT
-- Generate data for Connect 4/Stratego- needs RL and game environments to be completed first
+- Antichess game environment (Ian, not urgent)
+- Figure out how to load existing game environments into SIMPLE (Ian/Ben- VERY URGENT)
+- Figure out how to bootstrap semi-played positions into SIMPLE (Ian- VERY URGENT)
+- Recreate results from https://www.ai.rug.nl/~mwiering/GROUP/ARTICLES/ICPRAM_CHESS_DNN_2018.pdf (Brian- URGENT)
+- Generate data for Connect 4/Stratego- needs SIMPLE to be bootstrapped first.
 
 ### DONE:
 - Chess game environment (Ian)
 - Checkers game environment (Ian)
 - Connect-4 game environment (Ian)
+- Discussion with Eric (Ian)
 - Minimax + Alpha Beta Pruning skeleton (Brian)
 - GameTree Data Structure (Brian)
 
 ### NOTES:
 - Chess doesn't have en passant or promotion choice enabled (always queen). Isn't super necessary at the moment.
+- Stratego reserved for a later date when I have had some sleep and have the mental capacity to code it because it's arguably more coding than chess (Ian)
