@@ -14,12 +14,13 @@ SIMPLE is basically a deep reinforcement learning framework to learn board games
 6. Notify the groupchat when you're done with this.
 
 ### EXPERIMENT 1.2- Few-Shot Learning from Chess to All
-1. Train SIMPLE on each board game over X iterations (I think 150 seems reasonable right now) and save the policies. 
-2. Use SIMPLE to generate a set of 20 random midgame states for each game.
-3. Bootstrap SIMPLE to play out the game from each position. Have SIMPLE play out each position 100 times, and calculate the win rate for each position.
-4. Normalize the winrate for each position into the range (-3, 3). Bucket them in the same way that the paper from Experiment 1.1 buckets them (read section 3.1 of the paper for explanation). The buckets will be our output. In the end, we should have 20 positions, each with a corresponding numerical evaluation classification. The positions will again get one-hot encoded into a 64x13 vector, with empty squares as ID = 0. Note that we won't be using all 13 IDs for most games, since only chess has that many, but we still need to one-hot encode to this size to maintain the neural net architecture. Overall, 
-5. Take the saved model from Experiment 1.1. Freeze every layer but the initial layer (the embedding layer) and the final layer. Train on the small dataset. Record evaluation percentages.
-6. Do the same thing, but don't start with the saved model; train from scratch with the same number of data positions.
+1. Figure out how to load each game environment into SIMPLE.
+2. Train SIMPLE on each board game over X iterations (I think 150 seems reasonable right now) and save the policies. 
+3. Use SIMPLE to generate a set of 20 random midgame states for each game.
+4. Bootstrap SIMPLE to play out the game from each position. Have SIMPLE play out each position 100 times, and calculate the win rate for each position.
+5. Normalize the winrate for each position into the range (-3, 3). Bucket them in the same way that the paper from Experiment 1.1 buckets them (read section 3.1 of the paper for explanation). The buckets will be our output. In the end, we should have 20 positions, each with a corresponding numerical evaluation classification. The positions will again get one-hot encoded into a 64x13 vector, with empty squares as ID = 0. Note that we won't be using all 13 IDs for most games, since only chess has that many, but we still need to one-hot encode to this size to maintain the neural net architecture. Overall, 
+6. Take the saved model from Experiment 1.1. Freeze every layer but the initial layer (the embedding layer) and the final layer. Train on the small dataset. Record evaluation percentages.
+7. Do the same thing, but don't start with the saved model; train from scratch with the same number of data positions.
 
 In Experiments 1.1 and 1.2, for the final project we'll be ablating over the performance metric that we use. Currently, we're using the win rate for each position as the performance metric, but hopefully in the final project we'll be able to change that to something a little more sophisticated.
 
