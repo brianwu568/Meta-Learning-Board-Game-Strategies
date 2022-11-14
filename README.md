@@ -14,7 +14,7 @@ SIMPLE is basically a deep reinforcement learning framework to learn board games
 
 
 
-
+### Other TODOs
 
 1. Train SIMPLE on each board game we have configured. Record training time.
 2. Use the learned SIMPLE agent to generate data. For each position we generate, we can have SIMPLE play games itself from that position. The move predicted from that position is the the output of our neural net. 
