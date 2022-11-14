@@ -10,6 +10,7 @@
 
 ### DONE:
 - Chess game environment (Ian)
+- Checkers game environment (Ian)
 - Minimax skeleton (Brian)
 
 ### NOTES:
