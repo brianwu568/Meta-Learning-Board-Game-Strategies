@@ -24,18 +24,17 @@ class ChessCNNModel(torch.nn.Module):
     def __init__(self):
         super(ChessCNNModel, self).__init__()
 
-        # Note that the input dimension is (64,13). We want the output dimension to be (1,).
-        self.linear1 = torch.nn.Linear(64, 8)
+        # Note that the input dimension is (8, 8, 3). We want the output dimension to be (1,).
 
         # Convolution 1
         self.convolution1 = torch.nn.Conv2d(
-            in_channels = 1,
+            in_channels = 3,
             out_channels = 20,
             kernel_size = 5,
             stride = 1,
             padding = 0
         )
-        self.elu1 = torch.nn.ELU(alpha = 1.0, inplace = None)
+        self.elu1 = torch.nn.ELU(alpha = 1.0, inplace = False)
 
         # Max Pool 1
         self.max_pool1 = torch.nn.MaxPool2d(kernel_size = 2)
@@ -55,17 +54,14 @@ class ChessCNNModel(torch.nn.Module):
 
         # Fully Connected 1 (Readout)
         self.fully_connected1 = torch.nn.Linear(
-            in_features = 64*13,
+            in_features = 8*8*3,
             out_features = 1
         )
 
 
     def forward(self, input):
-        # Linear 1
-        output = self.linear1(input)
-
         # Convolution 1
-        output = self.convolution1(output)
+        output = self.convolution1(input)
         output = self.elu1(output)
 
         # Max Pool 1
