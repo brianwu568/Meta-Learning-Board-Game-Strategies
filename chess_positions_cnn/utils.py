@@ -1,40 +1,72 @@
 import torch
 import numpy as np
+import chess
+import chess.engine
 
 # Define Constants
-NUM_CLASSES = 64
+NUM_SQUARES = 64
 
 # Dictionary to map chess pieces to numerical encodings
 encodings_dict = {
-    'EMPTY': 0,  # empty square
-    'WP': 1,     # white pawn
-    'WN': 2,     # white knight
-    'WB': 3,     # white bishop
-    'WR': 4,     # white rook
-    'WQ': 5,     # white queen
-    'WK': 6,     # white king
-    'BP': 7,     # black pawn
-    'BN': 8,     # black knight
-    'BB': 9,     # black bishop
-    'BR': 10,    # black rook
-    'BQ': 11,    # black queen
-    'BK': 12     # black king
+    None: '0',
+    'P': '1',     # white pawn
+    'N': '2',     # white knight
+    'B': '3',     # white bishop
+    'R': '4',     # white rook
+    'Q': '5',     # white queen
+    'K': '6',     # white king
+    'p': '7',     # black pawn
+    'n': '8',     # black knight
+    'b': '9',     # black bishop
+    'r': '10',    # black rook
+    'q': '11',    # black queen
+    'k': '12'     # black king
 }
+
+def readfile(file):
+    engine = chess.engine.SimpleEngine.popen_uci("stockfish")
+    return_ar = []
+    reader = open(file, 'r')
+    total = 0
+    for x in reader.readlines():
+        if x[:3] == "1. ":
+            total += 1
+            board = chess.Board()
+            for a in x.split(".")[1:]:
+                if "1-0" not in a and "0-1" not in a and "1/2-1/2" not in a:
+                    
+                    move = a[1:a.rfind(" ")].split(" ")
+                    board.push_san(move[0])
+                    board.push_san(move[1])
+                    position = []
+                    for file in "abcdefgh":
+                        for rank in "12345678":
+                            piece = board.piece_at(chess.parse_square(file + rank))
+                            if (piece != None):
+                                position.append(board.piece_at(chess.parse_square(file + rank)).symbol())
+                            else:
+                                position.append(None)
+                    info = engine.analyse(board, chess.engine.Limit(time=0.1))
+                    return_ar.append([position, info['score'].pov(True)])   
+            if (total >= 10):
+                break
+    return return_ar
+
 
 
 # Given a 64x1 list of letters representing pieces, return a 64x1 torch tensor of numbers encoding the pieces
 def convert_pieces_to_numerical(input_list: 'list[str]', 
-    encodings_dict: 'dict[str, int]' = encodings_dict) -> torch.tensor:
-    # Ensure that the dimensions of the input list are 64x1
-    assert(len(input_list) == NUM_CLASSES)
+    encodings_dict: 'dict[str, int]' = encodings_dict):
+    # Ensure that the dimensions of the  list are 64x1
+    assert(len(input_list) == NUM_SQUARES)
 
     # Get a list of letters mapped to their numerical encodings using encodings_dict
     mapped_list = [encodings_dict[elem] for elem in input_list]
 
     # Convert the mapped list to a torch tensor
-    mapped_tensor = torch.tensor(mapped_list, dtype = torch.int)
+    #mapped_tensor = torch.tensor(mapped_list, dtype = torch.int)
 
-    return mapped_tensor
+    return mapped_list
 
 # Given a 64x1 torch tensor of numbers encoding the pieces, return a 64x13 one-hot tensor to pass into the CNN
 def convert_numerical_to_one_hot(input_tensor: torch.tensor) -> torch.tensor:
