@@ -1,0 +1,6 @@
+chess==1.9.3
+matplotlib
+numpy
+cairosvg
+imageio
+tqdm
