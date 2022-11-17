@@ -56,7 +56,7 @@ def render_images(directory, moves, san_format = False, debug = False):
                 adv = -10000
 
         if (debug == False):
-            svg = chess.svg.board(board=board,size=400)
+            svg = chess.svg.board(board=board,size=400, lastmove = move)
             with open(get_filename(directory, move_number = move_number + 1, advantage = adv),"w") as file: 
                 file.write(svg)
             cairosvg.svg2png(url=get_filename(directory, move_number = move_number + 1, advantage = adv), 
@@ -95,12 +95,12 @@ def plot_game(directory = "static", filename = "game.jpg"):
 
 if __name__ == "__main__":
 
-    White = Stockfish(10)
-    Black = Stockfish(15)
+    White = Stockfish(16)
+    Black = Stockfish(4)
 
     moves, result = simulate_game(White, Black)
     render_images("static", moves, False, False)
-    plot_game("static", "stockfish10-stockfish15-game.jpg")
+    plot_game("static", "stockfish16-stockfish4-game.jpg")
 
     White.engine.close()
     Black.engine.close()
