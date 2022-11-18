@@ -72,7 +72,7 @@ def plot_game(directory = "static", filename = "game.jpg"):
 
   num_cols = 4
   num_rows = (num_images + num_cols - 1) // num_cols 
-  fig,ax = plt.subplots(figsize = (3.5 * num_cols,3.5 * num_rows), 
+  fig,ax = plt.subplots(figsize = (3 * num_cols,3.5 * num_rows), 
                         nrows = num_rows, ncols = num_cols)
 
   for image_num in range(num_images): 
@@ -95,6 +95,12 @@ def plot_game(directory = "static", filename = "game.jpg"):
 
 if __name__ == "__main__":
 
+    san_moves = ['e2e4', 'e7e5', 'g1f3', 'd7d5', 'f1b5', 'b8c6', 'b5c6', 'b7c6']
+    moves = [chess.Move.from_uci(m) for m in san_moves]
+    render_images("static", moves, False, False)
+    plot_game("static", "CNN-playing-itself.game.jpg")
+
+    """
     White = Stockfish(16)
     Black = Stockfish(4)
 
@@ -104,4 +110,5 @@ if __name__ == "__main__":
 
     White.engine.close()
     Black.engine.close()
+    """
 
