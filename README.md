@@ -52,6 +52,7 @@ The idea for this is basically the same as the previous experiments; the differe
 - Discussion with Eric (Ian)
 - Minimax + Alpha Beta Pruning skeleton (Brian)
 - GameTree Data Structure (Brian)
+- Added Chess position evaluation CNN to benji branch (Ben)
 
 ### NOTES:
 - Chess doesn't have en passant or promotion choice enabled (always queen). Isn't super necessary at the moment.
