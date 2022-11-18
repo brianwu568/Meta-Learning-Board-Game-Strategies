@@ -98,7 +98,7 @@ if __name__ == "__main__":
     san_moves = ['e2e4', 'e7e5', 'g1f3', 'd7d5', 'f1b5', 'b8c6', 'b5c6', 'b7c6']
     moves = [chess.Move.from_uci(m) for m in san_moves]
     render_images("static", moves, False, False)
-    plot_game("static", "CNN-playing-itself.game.jpg")
+    plot_game("static", "CNN-playing-itself.jpg")
 
     """
     White = Stockfish(16)
