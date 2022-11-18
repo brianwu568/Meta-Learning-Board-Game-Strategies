@@ -4,3 +4,4 @@ numpy
 cairosvg
 imageio
 tqdm
+tensorflow
