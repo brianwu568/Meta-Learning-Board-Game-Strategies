@@ -3,18 +3,26 @@ import numpy as np
 from torch.utils.data import Dataset
 
 # LOAD DATASET
+# INSTANTIATE MODEL CLASS
+if torch.cuda.is_available() == True: # GPU Available
+    DEVICE = torch.device("cuda:0")
+else: # GPU Not Available, defaulting to CPU
+    DEVICE = torch.device("cpu")
 
-with open("chess_train.txt", "r") as fd:
+
+with open("binary_approach/chess_analysis_train.txt", "r") as fd:
     content = fd.readlines()
     # each row is split into a list of string representing float numbers
     # then each string is converted to a float with map(float, ...)
     values_train = [list(map(float, row.strip().split(" "))) for row in content]
 values_train = torch.tensor(values_train)
-boards_train = values_train[:, :-1]
+boards_train = values_train[:, :-1].long()
 evals_train = values_train[:, -1]
-boards_train = boards_train.long()
+print(evals_train.shape)
+print(torch.sum(evals_train))
+input()
 
-with open("chess_test.txt", "r") as fd:
+with open("binary_approach/chess_analysis_test.txt", "r") as fd:
     content = fd.readlines()
     # each row is split into a list of string representing float numbers
     # then each string is converted to a float with map(float, ...)
@@ -23,17 +31,19 @@ values_test = torch.tensor(values_test)
 boards_test = values_test[:, :-1]
 evals_test = values_test[:, -1]
 boards_test = boards_test.long()
-
+print(torch.sum(evals_test))
+print(evals_test.shape)
+input()
 # CREATE DATA LOADERS
-batch_size = 8
-number_of_iterations = 5000
+batch_size = 256
+number_of_iterations = 500000
 number_of_epochs = int(number_of_iterations / (values_train.shape[0] / batch_size))
 
 
 class ChessBoardDataset(Dataset):
     def __init__(self, boards, evals):
-        self.boards = boards
-        self.evals = evals
+        self.boards = boards.to(DEVICE)
+        self.evals = evals.to(DEVICE)
 
 
     def __len__(self):
@@ -42,40 +52,13 @@ class ChessBoardDataset(Dataset):
     def __getitem__(self, idx):
         # Return Category
         def return_category(x: float) -> int:
-            if x < -5.5:
+            if x <= 0:
+                return 0
+            else:
                 return 1
-            elif -5.5 <= x < -4.5:
-                return 2
-            elif -4.5 <= x < -3.5:
-                return 3
-            elif -3.5 <= x < -2.5:
-                return 4
-            elif -2.5 <= x < -1.5:
-                return 5
-            elif -1.5 <= x < -0.5:
-                return 6
-            elif -0.5 <= x < 0.5:
-                return 7
-            elif 0.5 <= x < 1.5:
-                return 8
-            elif 1.5 <= x < 2.5:
-                return 9
-            elif 2.5 <= x < 3.5:
-                return 10
-            elif 3.5 <= x < 4.5:
-                return 11
-            elif 4.5 <= x < 5.5:
-                return 12
-            else: # x >= 5.5
-                return 13
 
-
-        one_hot = torch.eye(13) # 13x13 identity matrix
         board = self.boards[idx]
-        board = one_hot[board]
-        # label = self.evals[idx]
-        label = return_category(idx)
-        
+        label = return_category(self.evals[idx])
         return board, label
     
 train_data = ChessBoardDataset(boards_train, evals_train)
@@ -105,7 +88,7 @@ class ChessCNNModel(torch.nn.Module):
         super(ChessCNNModel, self).__init__()
 
         # Note that the input dimension is (64,13). We want the output dimension to be (1,).
-        self.linear1 = torch.nn.Linear(13, 8)
+        self.linear1 = torch.nn.Linear(13, 8).to(DEVICE)
 
         # Convolution 1
         self.convolution1 = torch.nn.Conv2d(
@@ -113,10 +96,12 @@ class ChessCNNModel(torch.nn.Module):
             out_channels = 20,
             kernel_size = 3,
             stride = 1,
-            padding = 1
-        )
-        self.elu1 = torch.nn.ELU(alpha = 1.0, inplace = None)
-
+            padding = 1)
+    
+        #self.elu1 = torch.nn.ELU(alpha = 1.0, inplace = None)
+        self.dropout1 = torch.nn.Dropout(0.3)
+        self.relu1 = torch.nn.LeakyReLU()
+        self.elu1 = torch.nn.ELU()
         # Max Pool 1
         self.max_pool1 = torch.nn.MaxPool2d(kernel_size = 2)
 
@@ -128,49 +113,47 @@ class ChessCNNModel(torch.nn.Module):
             stride = 1,
             padding = 1
         )
-        self.elu2 = torch.nn.ELU(alpha = 1.0, inplace = False)
-
+        #self.elu2 = torch.nn.ELU(alpha = 1.0, inplace = False)
+        self.dropout2 = torch.nn.Dropout(0.3)
+        self.relu2 = torch.nn.LeakyReLU()
+        self.elu2 = torch.nn.ELU()
         # Max Pool 2
         self.max_pool2 = torch.nn.MaxPool2d(kernel_size = 2)
 
         # Fully Connected 1 (Readout)
         self.fully_connected1 = torch.nn.Linear(
-            in_features = 50*16*2,
+            in_features = 200,
             out_features = 1
         )
 
 
-    def forward(self, input):
+    def forward(self, inp):
         # Linear 1
-        output = self.linear1(input)
+        inp = inp.to(DEVICE)
 
+        output = torch.reshape(inp, (inp.shape[0], 8, 8))
+        # output = self.linear1(inp)
         # Convolution 1
-        output = output[:, None, :, :]
+        output = output[:, None, :, :].to(dtype=torch.float32)
         output = self.convolution1(output)
-        output = self.elu1(output)
+        output = self.dropout1(output)
+        output = self.relu1(output)
 
         # Max Pool 1
         output = self.max_pool1(output)
         # Convolution 2
         output = self.convolution2(output)
-        output = self.elu2(output)
+        output = self.dropout2(output)
+        output = self.relu2(output)
 
         # Max Pool 2
         output = self.max_pool2(output)
         # Resize
         output = output.view(output.size(0), -1)
-
         # Fully Connected Layer
         output = self.fully_connected1(output)
-
-        return output
-
-
-# INSTANTIATE MODEL CLASS
-if torch.cuda.is_available() == True: # GPU Available
-    DEVICE = torch.device("cuda:0")
-else: # GPU Not Available, defaulting to CPU
-    DEVICE = torch.device("cpu")
+        #output = torch.sigmoid(output)
+        return torch.squeeze(output).to(dtype=torch.float)
 
 model = ChessCNNModel()
 model.to(DEVICE)
@@ -178,7 +161,7 @@ model.to(DEVICE)
 
 # INSTANTIATE LOSS FUNCTION
 # loss_function = torch.nn.MSELoss() # Numerical
-loss_function = torch.nn.CrossEntropyLoss() # Categorical
+loss_function = torch.nn.BCEWithLogitsLoss() # Categorical
 # loss_function = CategoricalCrossEntropyLoss() # Categorical, manually implemented (only forward prop, no backprop yet)
 
 # INSTANTIATE HYPERPARAMETERS
@@ -249,53 +232,61 @@ optimizer = torch.optim.SGD(params = model.parameters(), lr = learning_rate)
 # TRAIN THE MODEL: Categorical
 iteration = 0
 for epoch in range(number_of_epochs): # loop over all epochs
-    for i in range(len(train_dataloader)): # loop over all training examples
-        combined_example = train_dataloader[i]
+   for i, data in enumerate(train_dataloader): # loop over all training examples
+        for x, param in model.named_parameters():
+            if (x == "convolution1.weight"):
+                #print(x, param.data)
+                #input()
+                #input()
+                pass
+        combined_example = data
         current_example_boards = combined_example[0]
         current_example_labels = combined_example[1]
 
         # Clear gradients with respect to parameters
-        optimizer.zero_grad()
+        
 
         # Load data as tensors with gradient accumulation abilities
+        #
+        current_example_boards = current_example_boards.to(device=DEVICE, dtype=torch.float32)
         current_example_boards = current_example_boards.requires_grad_()
-
         # Forward pass to get output/logits
         outputs = model(current_example_boards)
-
         # Calculate Loss: softmax --> cross entropy loss
-        loss = loss_function(outputs, current_example_labels)
-
+        loss = loss_function(outputs, current_example_labels.to(dtype=torch.float32))
+        print(loss)
+        #print(outputs.detach().numpy().round())
         # Getting gradients with respect to parameters: backward propagation, then update parameters
+        optimizer.zero_grad()   
         loss.backward()
         optimizer.step()
+
 
         # Increment iteration counter
         iteration += 1
 
         # Calculate Accuracy Every 500 iterations
-        if iteration % 500 == 0:
+        if iteration % 500 == 499:
             # initialize counters
             number_correct = 0
             number_total = 0
 
             # Loop over test data
-            for i in range(len(test_dataloader)):
-                current_test_boards = test_dataloader[i][0]
-                current_test_labels = test_dataloader[i][1]
+            for j, test_data in enumerate(test_dataloader):
+                combined_test_example = test_data
+                current_test_boards = combined_test_example[0]
+                current_test_labels = combined_test_example[1]
 
                 # Get total number of labels
-                number_total = current_test_labels.size(0)
+                number_total += current_test_labels.size(0)
 
                 # Load boards to tensors with gradient accumulation abilities
-                current_test_boards = current_test_boards.requires_grad_()
+                #current_test_boards = current_test_boards.requires_grad_()
 
                 # Forward pass only to get logits/output
-                outputs = model(current_test_boards)
-
+                test_outputs = model(current_test_boards)
                 # Get predictions using torch.max
-                _, predictions = torch.max(outputs.data, 1)
-
+                predictions = torch.tensor(test_outputs.detach().numpy().round())
                 # Get number of correct predictions
                 running_sum = (predictions == current_test_labels).sum()
                 number_correct += running_sum
@@ -305,4 +296,3 @@ for epoch in range(number_of_epochs): # loop over all epochs
 
             # Print Loss to Terminal
             print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iteration, loss.item(), accuracy))
-model.save()

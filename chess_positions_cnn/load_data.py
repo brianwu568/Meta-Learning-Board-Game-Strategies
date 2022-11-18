@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 DATA_PATH = "data/dataset_2/"
-data_file = open("chess_data.txt", "w")
+data_file = open("chess_large.txt", "w")
 
 def get_all_games():
     # Define Empty Dictionary
@@ -26,7 +26,7 @@ def get_all_games():
                 else:
                     score = 0
                 data_file.write(" ".join(utils.convert_pieces_to_numerical(point[0])) + " " + str(score) + "\n")
-    
+
     
 
 get_all_games()

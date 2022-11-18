@@ -48,7 +48,7 @@ def readfile(file):
                                 position.append(None)
                     info = engine.analyse(board, chess.engine.Limit(time=0.1))
                     return_ar.append([position, info['score'].pov(True)])   
-            if (total >= 10):
+            if (total >= 50):
                 break
     return return_ar
 
