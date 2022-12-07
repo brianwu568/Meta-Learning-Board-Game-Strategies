@@ -1,0 +1,1 @@
+from checkers.envs.checkers import CheckersEnv
