@@ -193,9 +193,9 @@ def main_function():
         BOARDS.append(torch.tensor(BOARD))
 
     # TESTER FUNCTION: Print out each board
-    for b in BOARDS:
-        print(b)
-        print("")
+    # for b in BOARDS:
+    #     print(b)
+    #     print("")
 
     return BOARDS
 
