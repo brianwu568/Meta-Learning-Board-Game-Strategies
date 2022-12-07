@@ -45,7 +45,7 @@ class CheckerboardEnv(gym.Env):
             # Define 3 positions, TODO:need to extend to 12 positions
             position_1 = np.array([1 if x.number == 1 else 0 for x in self.board])
             position_1 = position_1.reshape(self.grid_shape)
-            position_2 = np.array([1 if x.umber == -1 else 0 for x in self.board])
+            position_2 = np.array([1 if x.number == -1 else 0 for x in self.board])
             position_2 = position_2.reshape(self.grid_shape)
             position_3 = np.array([self.can_be_placed(i) for i, x in enumerate(self.board)])
             position_3 = position_3.reshape(self.grid_shape)
@@ -54,7 +54,7 @@ class CheckerboardEnv(gym.Env):
             # Define 3 positions, TODO:need to extend to 12 positions
             position_1 = np.array([1 if x.number == -1 else 0 for x in self.board])
             position_1 = position_1.reshape(self.grid_shape)
-            position_2 = np.array([1 if x.umber == 1 else 0 for x in self.board])
+            position_2 = np.array([1 if x.number == 1 else 0 for x in self.board])
             position_2 = position_2.reshape(self.grid_shape)
             position_3 = np.array([self.can_be_placed(i) for i, x in enumerate(self.board)])
             position_3 = position_3.reshape(self.grid_shape)
