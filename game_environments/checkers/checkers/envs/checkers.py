@@ -12,10 +12,36 @@ class CheckersEnv(gym.env):
     # This Checkers Board Environment has 1 for the white player and -1 for the black player. Default player is 1 (white)
     ###
 
-    def __init__(self, print_debug = True):
+    def __init__(self, player, print_debug = True):
         self.board;
         self.kings;
+        self.n_players = 2;
+        self.current_player_num = player
         self.print_debug = print_debug;
+
+    # Observation Function
+    @property
+    def observation(self):
+        if self.current_player.token_number == 1: # player 1
+            # Define 3 positions, TODO:need to extend to 12 positions
+            position_1 = np.array([1 if x.number == 1 else 0 for x in self.board])
+            position_1 = position_1.reshape(self.grid_shape)
+            position_2 = np.array([1 if x.number == -1 else 0 for x in self.board])
+            position_2 = position_2.reshape(self.grid_shape)
+            position_3 = np.array([self.can_be_placed(i) for i, x in enumerate(self.board)])
+            position_3 = position_3.reshape(self.grid_shape)
+
+        else: # player 2
+            # Define 3 positions, TODO:need to extend to 12 positions
+            position_1 = np.array([1 if x.number == -1 else 0 for x in self.board])
+            position_1 = position_1.reshape(self.grid_shape)
+            position_2 = np.array([1 if x.number == 1 else 0 for x in self.board])
+            position_2 = position_2.reshape(self.grid_shape)
+            position_3 = np.array([self.can_be_placed(i) for i, x in enumerate(self.board)])
+            position_3 = position_3.reshape(self.grid_shape)
+
+        position_stack = np.stack([position_1, position_2, position_3], axis = -1)
+        return position_stack
 
     def reset(self):
         # Initialize Board, then set up player positions
@@ -211,7 +237,7 @@ class CheckersEnv(gym.env):
     # Original Position: [x, y] tuple
     # horizontal_delta: -1 for left, 1 for right
     # vertical_delta: -1 for up, 1 for down
-    def increment_game_state(self, player, original_position, horizontal_delta, vertical_delta):
+    def step(self, player, original_position, horizontal_delta, vertical_delta):
         previous_player_score = self.get_score(player)
 
         if player == -1:
@@ -234,7 +260,7 @@ class CheckersEnv(gym.env):
             self.fix_board(player)
             return False
 
-        # Ensure that the new position is not ount of bounds
+        # Ensure that the new position is not out of bounds
         if (-1 < new_position[0] < 8) != True:
             if self.print_debug == True:
                 print("New position is out of bounds - horizontal.")
@@ -282,13 +308,13 @@ class CheckersEnv(gym.env):
             self.fix_board(player)
             return False
 
-        # Check if we have to do a required move, and if this move is required or ont
+        # Check if we have to do a required move, and if this move is required or not
         required_moves = self.get_required_move(player, skip_rotate = True)
         if len(required_moves) > 0:
             if [original_position, new_position] not in required_moves:
                 if self.print_debug == True:
                     print("Current move not in list of required moves")
-                self.fix_board(board)
+                self.fix_board(player)
                 return False
         
         # Update list of kings
@@ -327,6 +353,123 @@ class CheckersEnv(gym.env):
         new_scoreboard = self.get_score(player)
         score_delta = new_scoreboard - previous_player_score
         return score_delta
+
+    # Function to check for legal actions. Returns a numpy vector with the same size as the action space
+    def legal_actions(self, player, original_position, vertical_delta):
+        BOARD = [[0] * 8 for _ in range(8)]
+        LEGAL = [[0] * 8 for _ in range(8)]
+
+        # Return a list containing all of the possible moves (not necessarily legal) out of all of boxes
+        def all_moves(board, x, y) -> list:
+            all_possible_new_positions = []
+            top_left = (x+1, y-1)
+            top_right = (x+1, y+1)
+            bottom_left = (x-1, y-1)
+            bottom_right = (x-1, y+1)
+            all_possible_new_positions.append(top_left)
+            all_possible_new_positions.append(top_right)
+            all_possible_new_positions.append(bottom_left)
+            all_possible_new_positions.append(bottom_right)
+            return all_possible_new_positions
+
+
+         # Ensure that the original position is not out of bounds
+        def check_original_position(original_position, player):
+            if original_position[0] < 0 or original_position[0] > 7 or original_position[1] < 0 or original_position[1] > 7:
+                self.fix_board(player)
+                return False
+            else:
+                return True
+
+        # Ensure that the new position is not out of bounds
+        def check_new_position(new_position, player):
+            if (-1 < new_position[0] < 8) != True:
+                self.fix_board(player)
+                return False
+            if (-1 < new_position[1] < 8) != True:
+                self.fix_board(player)
+                return False
+            return True
+
+        # Ensure Regular pieces cannot move downwards
+        def check_vertical(vertical_delta):
+            if vertical_delta == 1 and original_position not in self.kings:
+                self.fix_board(player)
+                return False
+            else:
+                return True
+
+        # Check to make sure you do not have a piece on the original position
+        def check_no_piece_original_position():
+            if self.board[original_position[0], original_position[1]] != player:
+                self.fix_board(player)
+                return False
+            else:
+                return True
+
+        # # Ensure that we are able to capture here
+        # capturing_indicator = self.is_capturing(
+        #     player, original_position, new_position, horizontal_delta, vertical_delta
+        # )
+
+        # if capturing_indicator != False:
+        #     # Set capturing position to empty
+        #     self.board[capturing_indicator[1][0], capturing_indicator[1][1]] = 0
+        #     # Remove from kings list if applicable
+        #     if capturing_indicator[1] in self.kings:
+        #         self.kings.remove(capturing_indicator[1])
+        #     # Debugging Utility
+        #     if self.print_debug == True:
+        #         print("Capturing Move")
+
+        # Check to ensure that we are not moving onto another filled spot
+        def check_no_filled_spots(new_position):
+            if self.board[new_position[0], new_position[1]] != 0:
+                self.fix_board(player)
+                return False
+            else:
+                return True
+
+        # Check if we have to do a required move, and if this move is required or not
+        def check_required_moves(new_position):
+            required_moves = self.get_required_move(player, skip_rotate = True)
+            if len(required_moves) > 0:
+                if [original_position, new_position] not in required_moves:
+                    self.fix_board(player)
+                    return False
+                else:
+                    return True
+            else:
+                return True
+
+            
+        for i in range(len(BOARD)):
+            for j in range(len(BOARD[i])):
+                current_position = (i, j)
+                all_new_positions = all_moves(BOARD, i, j)
+                for new_position in all_new_positions:
+                    legal_move_indicator = 1
+
+                    if check_original_position(original_position, player) == False:
+                        legal_move_indicator = 0
+                    if check_new_position(new_position, player) == False:
+                        legal_move_indicator = 0
+                    if check_vertical(vertical_delta) == False:
+                        legal_move_indicator = 0
+                    if not check_no_piece_original_position():
+                        legal_move_indicator = 0
+                    if check_no_filled_spots(new_position) == False:
+                        legal_move_indicator = 0
+                    if check_no_filled_spots(new_position) == False:
+                        legal_move_indicator = 0
+                    if check_required_moves(new_position) == False:
+                        legal_move_indicator = 0
+                    
+                    LEGAL[i][j] = legal_move_indicator
+        
+        return LEGAL
+
+        
 
     
     # Get a list of possible actions [position, new position]
