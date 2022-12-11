@@ -2,9 +2,6 @@
 
 from checkers_util import Board, Player, Piece
 
-
-
-
 def run_game():
     board = Board()
     white_player = Player(board, 0)
