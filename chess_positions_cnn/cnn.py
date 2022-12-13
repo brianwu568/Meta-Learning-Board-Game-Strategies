@@ -160,139 +160,148 @@ model.to(DEVICE)
 
 
 # INSTANTIATE LOSS FUNCTION
-# loss_function = torch.nn.MSELoss() # Numerical
-loss_function = torch.nn.BCEWithLogitsLoss() # Categorical
-# loss_function = CategoricalCrossEntropyLoss() # Categorical, manually implemented (only forward prop, no backprop yet)
+if 0:
+    loss_function = torch.nn.MSELoss() # Numerical
+if 1:
+    loss_function = torch.nn.BCEWithLogitsLoss() # Categorical
+if 0:
+    loss_function = CategoricalCrossEntropyLoss() # Categorical, manually implemented (only forward prop, no backprop yet)
 
 # INSTANTIATE HYPERPARAMETERS
 learning_rate = 0.01
-# optimizer = torch.optim.Adam(params = model.parameters(), lr = learning_rate)
-optimizer = torch.optim.SGD(params = model.parameters(), lr = learning_rate)
+if 0:
+    optimizer = torch.optim.Adam(params = model.parameters(), lr = learning_rate)
+if 1:
+    optimizer = torch.optim.SGD(params = model.parameters(), lr = learning_rate)
 
 
 # TRAIN THE MODEL: Numerical
-# iteration = 0
-# for epoch in range(number_of_epochs): # loop over all epochs
-#     print("Epoch", epoch)
-#     print(len(train_dataloader))
-#     input()
-#     for i, data in enumerate(train_dataloader, 0): # loop over all training examples
-#         train_inputs, train_labels = data
+if 0:
+    iteration = 0
+    for epoch in range(number_of_epochs): # loop over all epochs
+        print("Epoch", epoch)
+        print(len(train_dataloader))
+        input()
+        for i, data in enumerate(train_dataloader, 0): # loop over all training examples
+            train_inputs, train_labels = data
 
-#         # Clear gradients with respect to parameters
-#         optimizer.zero_grad()
+            # Clear gradients with respect to parameters
+            optimizer.zero_grad()
 
-#         # Load data as tensors with gradient accumulation abilities
-#         train_inputs = train_inputs.requires_grad_()
+            # Load data as tensors with gradient accumulation abilities
+            train_inputs = train_inputs.requires_grad_()
 
-#         # Forward pass to get output/logits
-#         train_outputs = model(train_inputs)
+            # Forward pass to get output/logits
+            train_outputs = model(train_inputs)
 
-#         # Calculate Loss: softmax --> cross entropy loss
-#         loss = loss_function(train_outputs, train_labels)
+            # Calculate Loss: softmax --> cross entropy loss
+            loss = loss_function(train_outputs, train_labels)
 
-#         # Getting gradients with respect to parameters: backward propagation, then update parameters
-#         loss.backward()
-#         optimizer.step()
+            # Getting gradients with respect to parameters: backward propagation, then update parameters
+            loss.backward()
+            optimizer.step()
 
-#         # Increment iteration counter
+            # Increment iteration counter
 
-#         # Calculate Accuracy Every 500 iterations
-#         if i % 100 == 99:
-#             # initialize counters
-#             number_correct = 0
-#             number_total = 0
+            # Calculate Accuracy Every 500 iterations
+            if i % 100 == 99:
+                # initialize counters
+                number_correct = 0
+                number_total = 0
 
-#             # Loop over test data
-#             for j, test_data in enumerate(train_dataloader, 0):
-#                 test_inputs, test_labels = test_data
+                # Loop over test data
+                for j, test_data in enumerate(train_dataloader, 0):
+                    test_inputs, test_labels = test_data
 
-#                 # Get total number of labels
-#                 number_total += test_labels.shape[0]
+                    # Get total number of labels
+                    number_total += test_labels.shape[0]
 
-#                 # Load boards to tensors with gradient accumulation abilities
-#                 test_inputs = test_inputs.requires_grad_()
+                    # Load boards to tensors with gradient accumulation abilities
+                    test_inputs = test_inputs.requires_grad_()
 
-#                 # Forward pass only to get logits/output
-#                 test_outputs = model(test_inputs)
-#                 # Get number of correct predictions
-#                 test_labels = test_labels.view(-1)
-#                 test_outputs = test_outputs.view(-1)
-#                 running_sum = (abs(test_outputs)/test_outputs == abs(test_labels)/test_labels).sum()
-#                 number_correct += running_sum
-            
-#             # Compute accuracy
-#             accuracy = 100 * (number_correct / number_total)
+                    # Forward pass only to get logits/output
+                    test_outputs = model(test_inputs)
+                    # Get number of correct predictions
+                    test_labels = test_labels.view(-1)
+                    test_outputs = test_outputs.view(-1)
+                    running_sum = (abs(test_outputs)/test_outputs == abs(test_labels)/test_labels).sum()
+                    number_correct += running_sum
 
-#             # Print Loss to Terminal
-#             print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iteration, loss.item(), accuracy))
+                # Compute accuracy
+                accuracy = 100 * (number_correct / number_total)
 
-# model.save()
+                # Print Loss to Terminal
+                print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iteration, loss.item(), accuracy))
+
+    model.save()
 
 # TRAIN THE MODEL: Categorical
-iteration = 0
-for epoch in range(number_of_epochs): # loop over all epochs
-   for i, data in enumerate(train_dataloader): # loop over all training examples
-        for x, param in model.named_parameters():
-            if (x == "convolution1.weight"):
-                #print(x, param.data)
-                #input()
-                #input()
-                pass
-        combined_example = data
-        current_example_boards = combined_example[0]
-        current_example_labels = combined_example[1]
+if 1:
+    iteration = 0
+    for epoch in range(number_of_epochs): # loop over all epochs
+       for i, data in enumerate(train_dataloader): # loop over all training examples
+            for x, param in model.named_parameters():
+                if (x == "convolution1.weight"):
+                    #print(x, param.data)
+                    #input()
+                    #input()
+                    pass
+            combined_example = data
+            current_example_boards = combined_example[0]
+            current_example_labels = combined_example[1]
 
-        # Clear gradients with respect to parameters
-        
-
-        # Load data as tensors with gradient accumulation abilities
-        #
-        current_example_boards = current_example_boards.to(device=DEVICE, dtype=torch.float32)
-        current_example_boards = current_example_boards.requires_grad_()
-        # Forward pass to get output/logits
-        outputs = model(current_example_boards)
-        # Calculate Loss: softmax --> cross entropy loss
-        loss = loss_function(outputs, current_example_labels.to(dtype=torch.float32))
-        print(loss)
-        #print(outputs.detach().numpy().round())
-        # Getting gradients with respect to parameters: backward propagation, then update parameters
-        optimizer.zero_grad()   
-        loss.backward()
-        optimizer.step()
+            # Clear gradients with respect to parameters
 
 
-        # Increment iteration counter
-        iteration += 1
+            # Load data as tensors with gradient accumulation abilities
+            #
+            current_example_boards = current_example_boards.to(device=DEVICE, dtype=torch.float32)
+            current_example_boards = current_example_boards.requires_grad_()
+            # Forward pass to get output/logits
+            outputs = model(current_example_boards)
+            # Calculate Loss: softmax --> cross entropy loss
+            loss = loss_function(outputs, current_example_labels.to(dtype=torch.float32))
+            print(loss)
+            #print(outputs.detach().numpy().round())
+            # Getting gradients with respect to parameters: backward propagation, then update parameters
+            optimizer.zero_grad()   
+            loss.backward()
+            optimizer.step()
 
-        # Calculate Accuracy Every 500 iterations
-        if iteration % 500 == 499:
-            # initialize counters
-            number_correct = 0
-            number_total = 0
 
-            # Loop over test data
-            for j, test_data in enumerate(test_dataloader):
-                combined_test_example = test_data
-                current_test_boards = combined_test_example[0]
-                current_test_labels = combined_test_example[1]
+            # Increment iteration counter
+            iteration += 1
 
-                # Get total number of labels
-                number_total += current_test_labels.size(0)
+            # Calculate Accuracy Every 500 iterations
+            if iteration % 500 == 499:
+                # initialize counters
+                number_correct = 0
+                number_total = 0
 
-                # Load boards to tensors with gradient accumulation abilities
-                #current_test_boards = current_test_boards.requires_grad_()
+                # Loop over test data
+                for j, test_data in enumerate(test_dataloader):
+                    combined_test_example = test_data
+                    current_test_boards = combined_test_example[0]
+                    current_test_labels = combined_test_example[1]
 
-                # Forward pass only to get logits/output
-                test_outputs = model(current_test_boards)
-                # Get predictions using torch.max
-                predictions = torch.tensor(test_outputs.detach().numpy().round())
-                # Get number of correct predictions
-                running_sum = (predictions == current_test_labels).sum()
-                number_correct += running_sum
+                    # Get total number of labels
+                    number_total += current_test_labels.size(0)
 
-            # Compute accuracy
-            accuracy = 100 * (number_correct / number_total)
+                    # Load boards to tensors with gradient accumulation abilities
+                    #current_test_boards = current_test_boards.requires_grad_()
 
-            # Print Loss to Terminal
-            print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iteration, loss.item(), accuracy))
+                    # Forward pass only to get logits/output
+                    test_outputs = model(current_test_boards)
+                    # Get predictions using torch.max
+                    predictions = torch.tensor(test_outputs.detach().numpy().round())
+                    # Get number of correct predictions
+                    running_sum = (predictions == current_test_labels).sum()
+                    number_correct += running_sum
+
+                # Compute accuracy
+                accuracy = 100 * (number_correct / number_total)
+
+                # Print Loss to Terminal
+                print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iteration, loss.item(), accuracy))
+                
+    model.save()
