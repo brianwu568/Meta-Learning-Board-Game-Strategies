@@ -5,6 +5,7 @@ import sys
 
 import csv
 import io
+import numpy as np
 
 import chess
 import chess.engine

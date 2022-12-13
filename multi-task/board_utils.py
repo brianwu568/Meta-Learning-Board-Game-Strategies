@@ -18,6 +18,57 @@ def render_square(square):
     print("bruh")
     return 0
 
+def generate_onehot_simple(pgn):
+
+    NUM_CHANNELS = 6 
+    pgn_relevant, rel_player, castling, en_passant  = pgn.split(" ")
+    rel_player = rel_player.strip().lower()
+
+
+    PLAYER = 1 if rel_player == "w" else -1
+
+    castling = castling.strip()
+    en_passant = en_passant.strip()
+
+    #include a buffer 8 x 8 x 1 of information 
+    extra_states = np.zeros(shape = (8,8,1))
+    if ("K" in castling):
+      extra_states[0,0,0] = 1
+    if ("Q" in castling):
+      extra_states[1,0,0] = 1
+    if ("k" in castling):
+      extra_states[2,0,0] = 1
+    if ("q" in castling):
+      extra_states[3,0,0] = 1
+    if (en_passant != "-"):
+      extra_states[4,0,0] = render_square(en_passant)
+
+    #pgn_relevant = pgn.split(" ", 1)[0]
+
+    board_rows = pgn_relevant.split("/")
+    FILLER = [0 for _ in range(NUM_CHANNELS)] + [PLAYER]
+    ENCODERS = np.array(np.eye(NUM_CHANNELS))
+
+    indexer = {'p': 0, 'b': 1, 'n': 2, 'r': 3, 'q': 4, 'k': 5,
+                'P': 0, 'B': 1, 'N': 2, 'R': 3, 'Q': 4, 'K': 5}
+    image = []
+    for row in board_rows:
+        image_row = [] 
+        for col in row:
+            if (col.isdigit() == True):
+                for _ in range(int(col)):
+                    image_row.append(FILLER)
+            else: 
+                multiplier = -1 if col.islower() == True else 1
+                image_row.append(list(multiplier * ENCODERS[indexer[col]]) + [PLAYER])
+        
+        image.append(image_row)
+    
+    #add some extra stuff for the additional information 
+    #print(np.array(image).shape, extra_states.shape)
+
+    return np.concatenate((np.array(image), extra_states), axis = -1)
+
 def generate_onehot(pgn, isWhite = True):
 
     if (isWhite == True):
@@ -69,6 +120,14 @@ def generate_onehot(pgn, isWhite = True):
     #print(np.array(image).shape, extra_states.shape)
 
     return np.concatenate((np.array(image), extra_states), axis = -1)
+
+def encode_images_simple(data_images):
+    vectorized_images = []
+
+    for i in tqdm(range(len(data_images))):
+        image_pgn = data_images[i]
+        vectorized_images.append(generate_onehot_simple(image_pgn))
+    return np.array(vectorized_images)
 
 def encode_images(data_images, player_states):
     vectorized_images = []
