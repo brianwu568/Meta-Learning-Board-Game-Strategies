@@ -1,3 +1,5 @@
+# Reference: This environment is based off of an OpenAI Gym Environment developed by Daphne Theodorakopoulos, and further modified to conform with requirements from the SIMPLE game engine.
+
 # Import Required Packages
 import gym
 import numpy as np
