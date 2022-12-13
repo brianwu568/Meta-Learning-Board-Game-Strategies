@@ -1,3 +1,5 @@
+// Attribution: This is an open-source endgame database driver used to provide access to the Cake, Chinook, and Kingsrow English and Italian checkers databases.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "egdb.h"
