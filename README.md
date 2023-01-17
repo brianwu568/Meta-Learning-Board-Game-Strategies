@@ -1,4 +1,4 @@
-# CS330 Fall 2022 Final Project: Meta-Learning Techniques for Board Game Strategy Development
+# Meta-Learning Techniques for Board Game Strategy Development
 
 ### Overview
 Inspiration: https://medium.com/applied-data-science/how-to-train-ai-agents-to-play-multiplayer-games-using-self-play-deep-reinforcement-learning-247d0b440717.
